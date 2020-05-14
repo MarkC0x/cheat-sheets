@@ -1,0 +1,142 @@
+Using “kafka-reassign-partitions” for Data Balancing
+
+Follow the broker, topic, and message production/consumption information from: https://docs.confluent.io/current/kafka/rebalancer/index.html#auto-data-balancing
+
+bin/kafka-topics --bootstrap-server 127.0.0.1:9092 --list
+bin/kafka-topics --describe --topic topic-a --bootstrap-server localhost:9092
+bin/kafka-topics --describe --topic topic-b --bootstrap-server localhost:9092
+
+
+topics-to-move.json
+
+{
+  "topics": [
+    {
+      "topic": "topic-a"
+    },
+    {
+      "topic": "topic-b"
+    }
+  ],
+  "version": 1
+}
+
+
+Generate the Reassignment Plan
+
+bin/kafka-reassign-partitions --topics-to-move-json-file topics-to-move.json --broker-list "0,1,2,3" --generate --zookeeper localhost:2181
+
+
+reassignment.json (from the command above)
+
+{
+  "version": 1,
+  "partitions": [
+    {
+      "topic": "topic-a",
+      "partition": 3,
+      "replicas": [
+        0,
+        1
+      ],
+      "log_dirs": [
+        "any",
+        "any"
+      ]
+    },
+    {
+      "topic": "topic-a",
+      "partition": 0,
+      "replicas": [
+        1,
+        2
+      ],
+      "log_dirs": [
+        "any",
+        "any"
+      ]
+    },
+    {
+      "topic": "topic-b",
+      "partition": 2,
+      "replicas": [
+        3,
+        1
+      ],
+      "log_dirs": [
+        "any",
+        "any"
+      ]
+    },
+    {
+      "topic": "topic-b",
+      "partition": 1,
+      "replicas": [
+        2,
+        0
+      ],
+      "log_dirs": [
+        "any",
+        "any"
+      ]
+    },
+    {
+      "topic": "topic-a",
+      "partition": 2,
+      "replicas": [
+        3,
+        0
+      ],
+      "log_dirs": [
+        "any",
+        "any"
+      ]
+    },
+    {
+      "topic": "topic-b",
+      "partition": 0,
+      "replicas": [
+        1,
+        3
+      ],
+      "log_dirs": [
+        "any",
+        "any"
+      ]
+    },
+    {
+      "topic": "topic-a",
+      "partition": 1,
+      "replicas": [
+        2,
+        3
+      ],
+      "log_dirs": [
+        "any",
+        "any"
+      ]
+    },
+    {
+      "topic": "topic-b",
+      "partition": 3,
+      "replicas": [
+        0,
+        2
+      ],
+      "log_dirs": [
+        "any",
+        "any"
+      ]
+    }
+  ]
+}
+
+
+Execute the Reassignment Plan (don’t forget —throttle parameter in Production)
+
+bin/kafka-reassign-partitions --reassignment-json-file reassignment.json --execute --zookeeper localhost:2181
+
+bin/kafka-reassign-partitions --verify --zookeeper localhost:2181 --reassignment-json-file reassignment.json
+
+bin/kafka-topics --describe --topic topic-a --bootstrap-server localhost:9092
+bin/kafka-topics --describe --topic topic-b --bootstrap-server localhost:9092
