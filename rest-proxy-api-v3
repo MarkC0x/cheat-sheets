@@ -1,0 +1,79 @@
+Using the New Rest Proxy V3 API: Example for “retention.ms”
+
+
+Use the Rest Proxy API to Obtain the Cluster ID
+
+curl -X GET -H "Accept: application/vnd.api+json" http://localhost:8082/v3/clusters
+
+{
+  "data": {
+    "id": "crn:///kafka=[Cluster-ID]/topic=test-topic/config=retention.ms",
+    "links": {
+      "self": "http://localhost:8082/v3/clusters/[Cluster-ID]/topics/test-topic/configs/retention.ms"
+    },
+    "attributes": {
+      "cluster_id": "[Cluster-ID]",
+      "topic_name": "test-topic",
+      "name": "retention.ms",
+      "value": "604800000",
+      "is_default": false,
+      "is_read_only": false,
+      "is_sensitive": false
+    },
+    "type": "KafkaTopicConfig"
+  }
+}
+
+
+Use the Rest Proxy API to Obtain the Current Setting for “retention.ms”
+
+curl -X GET -H "Accept: application/vnd.api+json" http://localhost:8082/v3/clusters/[Cluster-ID]/topics/test-topic/configs/retention.ms
+
+{
+  "data": {
+    "id": "crn:///kafka=[Cluster-ID]/topic=test-topic/config=retention.ms",
+    "links": {
+      "self": "http://localhost:8082/v3/clusters/[Cluster-ID]/topics/test-topic/configs/retention.ms"
+    },
+    "attributes": {
+      "cluster_id": "[Cluster-ID]",
+      "topic_name": "test-topic",
+      "name": "retention.ms",
+      "value": "604800000",
+      "is_default": false,
+      "is_read_only": false,
+      "is_sensitive": false
+    },
+    "type": "KafkaTopicConfig"
+  }
+}
+
+
+Use the Rest Proxy API to Change the Setting for “retention.ms”
+
+curl -X PUT -H "Content-Type: application/vnd.api+json" --data '{"data":{"attributes":{"value":"3600"}}}'  http://localhost:8082/v3/clusters/[Cluster-ID]/topics/test-topic/configs/retention.ms
+
+
+Use the Rest Proxy API to Obtain the Current Setting for “retention.ms”
+
+curl -X GET -H "Accept: application/vnd.api+json" http://localhost:8082/v3/clusters/[Cluster-ID]/topics/test-topic/configs/retention.ms
+
+{
+  "data": {
+    "id": "crn:///kafka=[Cluster-ID]/topic=test-topic/config=retention.ms",
+    "links": {
+      "self": "http://localhost:8082/v3/clusters/[Cluster-ID]/topics/test-topic/configs/retention.ms"
+    },
+    "attributes": {
+      "cluster_id": "[Cluster-ID]",
+      "topic_name": "test-topic",
+      "name": "retention.ms",
+      "value": "3600",
+      "is_default": false,
+      "is_read_only": false,
+      "is_sensitive": false
+    },
+    "type": "KafkaTopicConfig"
+  }
+}
+
