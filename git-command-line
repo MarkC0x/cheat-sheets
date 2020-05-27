@@ -1,0 +1,19 @@
+GitHub and Git Commands
+
+git clone git@github.com:MarkC0x/kafka-connect-jdbc.git
+
+git status
+
+git branch -a
+
+git branch 363-updated
+
+git checkout 363-updated
+
+mvn clean
+mvn compile
+mvn install -DskipTests
+
+git commit -am "#363 - New MySQL Sink Dialect Update to TEXT"
+
+git push --set-upstream origin 363-updated
