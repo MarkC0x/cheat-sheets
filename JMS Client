@@ -1,0 +1,42 @@
+I did a bit more investigation around the JMS Client over this past weekend, and also conferred with our Engineering team again.  I do think what you are trying to achieve should be possible, but I wanted to pass along some additional information on configuration which may be helpful.
+
+1. In terms of the settings within your SAP Adapter UI fields, I believe they should be along the lines of:
+	- JNDI Lookup Name of Topic/QueueConnectionFactory: "ConnectionFactory"
+	- JNDI Lookup Name of JMS Queue/Topic: Name referenced in your "jndi.properties" file (see below)
+	- Name of JNDI Initial Context Factory: "io.confluent.kafka.jms.KafkaInitialContextFactory" 
+	- JNDI Server Address: See (*) below
+
+2. Create a "jndi.properties" file, an example of which is below.  Make sure you add in the "jms.create.connection.ignore.authenticate" parameter, and configure the "zookeeper.connect" and "bootstrap.servers" entries correctly.
+
+Also, configure the correct Kafka Topic physical name and jndiName alias.
+
+
+# JNDI Initial Context Factory
+java.naming.factory.initial = io.confluent.kafka.jms.KafkaInitialContextFactory
+
+# JMS Client properties
+
+client.id = jms-jndi
+zookeeper.connect = localhost:2181
+bootstrap.servers = localhost:9092
+
+jms.create.connection.ignore.authenticate = true
+
+# Register queues in JNDI using the form:
+#   queue.[jndiName] = [physicalName]
+
+# Register topics in JNDI using the form:
+#   topic.[jndiName] = [physicalName]
+
+topic.Test-Topic = Test-JNDI-Topic
+
+
+3. The "jndi.properties" file needs to also be packaged into the fat-JAR file that was created previously:
+	- In the directory where you placed your "pom.xml" file to create the fat-JAR, also create the directories "src/main/resources"
+	- In the "resources" sub-directory copy your configured "jndi.properties" file into here
+	- Go back to the directory where you placed your "pom.xml" file and run the "mvn package" command again
+	- This is the new fat-JAR file to use containing the "jndi.properties"
+
+(*) For the JNDI Server Address, I believe you should be able to put in anything in here.  The reason being is that this value gets passed to the InitialContextFactory, where it is normally used, but in the KafkaInitialConnectionFactory it is only a simple example and instead that ignores any JNDI Server Address parameters and instead uses the contents of the "jndi.properties" file for it’s lookups instead.
+
+I am hoping this information is of some use — I got this working over the weekend for a simple test case, but I don’t have the SAP Adapter to fully confirm.
