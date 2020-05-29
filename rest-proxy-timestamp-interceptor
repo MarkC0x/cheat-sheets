@@ -1,8 +1,9 @@
-Setup TimeStamp Interceptor
+Setup TimeStamp Interceptor and Read Generated Messages
 
 consumer.interceptor.classes=io.confluent.connect.replicator.offsets.ConsumerTimestampsInterceptor
 
 export CLASSPATH=/Users/mark.cox/Kafka/confluent-5.5.0/share/java/kafka-connect-replicator/*
+bin/kafka-console-consumer --topic __consumer_timestamps --bootstrap-server 127.0.0.1:9092 --property print.key=true --property key.deserializer=io.confluent.connect.replicator.offsets.GroupTopicPartitionDeserializer --property value.deserializer=io.confluent.connect.replicator.offsets.TimestampAndDeltaDeserializer --group TimeStampInterceptor
 
 
 Produce Some Messages
