@@ -1,0 +1,29 @@
+Setup TimeStamp Interceptor
+
+consumer.interceptor.classes=io.confluent.connect.replicator.offsets.ConsumerTimestampsInterceptor
+
+export CLASSPATH=/Users/mark.cox/Kafka/confluent-5.5.0/share/java/kafka-connect-replicator/*
+
+
+Produce Some Messages
+curl -X POST -H "Content-Type: application/vnd.kafka.binary.v2+json" -H "Accept: application/vnd.kafka.v2+json" --data '{"records":[{"value":"S2Fma2E="}]}' "http://localhost:8082/topics/albertsons"
+
+
+Create the Consumer Group
+
+curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"name": "my_consumer_instance", "format": "binary", "auto.commit.enable": "true"}' http://localhost:8082/consumers/my_consumer
+
+
+Subscribe to the Topic
+
+curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["albertsons"]}' http://localhost:8082/consumers/my_consumer/instances/my_consumer_instance/subscription
+
+
+Consume Records
+
+curl -X GET -H "Accept: application/vnd.kafka.binary.v2+json" http://localhost:8082/consumers/my_consumer/instances/my_consumer_instance/records
+
+
+Commit Offsets
+
+curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" http://localhost:8082/consumers/my_consumer/instances/my_consumer_instance/offsets
