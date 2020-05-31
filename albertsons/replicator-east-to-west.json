@@ -1,0 +1,17 @@
+{
+  "name": "replicator-east-to-west",
+  "config": {
+    "connector.class": "io.confluent.connect.replicator.ReplicatorSourceConnector",
+    "topic.whitelist": "albertsons",
+    "key.converter": "io.confluent.connect.replicator.util.ByteArrayConverter",
+    "value.converter": "io.confluent.connect.replicator.util.ByteArrayConverter",
+    "header.converter": "io.confluent.connect.replicator.util.ByteArrayConverter",
+    "src.kafka.bootstrap.servers": "ec2-54-176-222-249.us-west-1.compute.amazonaws.com:9092",
+    "dest.kafka.bootstrap.servers": "ec2-54-193-82-232.us-west-1.compute.amazonaws.com:9092",
+    "provenance.header.enable": "true",
+    "src.consumer.group.id": "replicator-east-to-west",
+    "offset.timestamps.commit": "false",
+    "tasks.max": "2",
+    "topic.create.backoff.ms": "10000"
+  }
+}
