@@ -1,0 +1,73 @@
+Set Up K8S Cluster Using EKSCTL
+===============================
+
+aws ec2 describe-availability-zones --region us-west-2
+
+eksctl create cluster --name mcox-k8s --version=1.16 --nodegroup-name=standard-workers --node-type m5.xlarge --nodes=6 --nodes-min=4 --nodes-max=6 --region=us-west-2 --zones=us-west-2a,us-west-2b,us-west-2c --node-ami auto --external-dns-access
+
+Note: Needed to go into AWS “Service Quotas” -> “Amazon VPC” and increase “VPCs per Region” and “Internet gateways per Region”
+
+kubectl get pods --namespace=operator
+kubectl get services -n operator
+
+
+/etc/hosts:
+
+54.201.106.93	kafka.mcoxk8s.aws.com   kafka
+35.160.203.189	b0.mcoxk8s.aws.com      b0
+52.38.67.152	b1.mcoxk8s.aws.com	b1
+54.149.218.175	b2.mcoxk8s.aws.com	b2
+34.211.67.28	controlcenter.mcoxk8s.aws.com	controlcenter
+
+
+Install CP Using Operator
+=========================
+
+cp aws.yaml my-values.yaml
+
+my-values.yaml:
+
+loadBalancer:
+  enabled: true
+  domain: "mcoxk8s.aws.com"
+
+export VALUES_FILE="/Users/mark.cox/Downloads/confluent-operator-5.5.0/helm/providers/my-values.yaml" 
+
+./operator-util.sh -n operator -r dc1 -f $VALUES_FILE
+
+kubectl get pods -n operator
+kubectl get kafka -n operator -oyaml
+
+
+Produce and Consumer Some Data
+==============================
+
+kafka.properties:
+
+bootstrap.servers=kafka.mcoxk8s.aws.com:9092
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="test" password="test123";
+sasl.mechanism=PLAIN
+security.protocol=SASL_PLAINTEXT
+
+
+ ~/Kafka/confluent-5.5.0/bin/kafka-topics --bootstrap-server kafka.mcoxk8s.aws.com:9092 --command-config kafka.properties --create --replication-factor 3 --partitions 6 --topic example.topic
+
+seq 10000 | ~/Kafka/confluent-5.5.0/bin/kafka-console-producer --topic example.topic --broker-list kafka.mcoxk8s.aws.com:9092 --producer.config kafka.properties 
+
+~/Kafka/confluent-5.5.0/bin/kafka-console-consumer --from-beginning --topic example.topic --bootstrap-server kafka.mcoxk8s.aws.com:9092 --consumer.config kafka.properties
+
+
+Set Up Control Center
+=====================
+
+helm upgrade --install dc1-sr-replicator-connect-c3 \
+  --values $VALUES_FILE \
+  --namespace operator \
+  --set connect.enabled=true,schemaregistry.enabled=true,replicator.enabled=true,controlcenter.enabled=true,ksql.enabled=true \
+  --set controlcenter.loadBalancer.enabled=true \
+  --set controlcenter.loadBalancer.domain=mcoxk8s.aws.com \
+  ./confluent-operator
+
+kubectl port-forward svc/controlcenter 9021:9021 -n operator
+
+http://localhost:9021 [admin/Developer1]
