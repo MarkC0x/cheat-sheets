@@ -1,0 +1,27 @@
+Schema Registry
+
+
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Payment\",\"namespace\":\"io.confluent.examples.clients.basicavro\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"amount\",\"type\":\"double\"},{\"name\":\"region\",\"type\":\"string\",\"default\":\"\"}]}"}' http://localhost:8086/subjects/schema-test-value/versions
+
+
+Schema Registry HTTPS
+
+
+#listeners=http://0.0.0.0:8081
+listeners=https://0.0.0.0:8081
+inter.instance.protocol=https
+ssl.truststore.location=/Users/mark.cox/Kafka/intel/kafka.server.truststore.jks
+ssl.truststore.password=password
+ssl.keystore.location=/Users/mark.cox/Kafka/intel/kafka.server.keystore.jks
+ssl.keystore.password=password
+ssl.key.password=password
+ssl.endpoint.identification.algorithm=
+
+
+Works in “insecure” mode (i.e. ignore SSL)
+Note: setting “insecure” mode doesn’t work if you set “ssl.client.auth=true”
+curl -X GET https://Mark-Coxs-MBP13.local:8081/subjects -vvvv --insecure
+
+
+This also works (if you set “ssl.client.auth=false”)
+curl -X GET https://Mark-Coxs-MBP13.local:8081/subjects -vvvv --cacert /Users/mark.cox/Kafka/intel/ca-cert
