@@ -1,0 +1,39 @@
+Generate Keystore (containing key and certificate) for Server
+
+keytool -keystore kafka.server.keystore.jks -alias restproxy -keyalg RSA -genkey -storetype pkcs12 -storepass password -keypass password -dname "CN=Mark-Coxs-MBP13.local,OU=CSTA,O=CONFLUENT,L=PaloAlto,S=CA,C=US" -ext "SAN=dns:restproxy,dns:localhost"
+
+keytool -list -v -keystore kafka.server.keystore.jks
+
+
+Owner: CN=Mark-Coxs-MBP13.local, OU=CSTA, O=CONFLUENT, L=PaloAlto, ST=CA, C=US
+Issuer: C=US, ST=CA, L=PaloAlto, O=Confluent, OU=CSTA, CN=ca1.confluentdemo.io
+
+The principal is C=US,ST=CA,L=PaloAlto,O=Confluent,OU=CSTA,CN=ca1.confluentdemo.io
+
+Principal Mapping Rule (Before and After)
+No rules apply to C=US,ST=CA,L=PaloAlto,O=Confluent,OU=CSTA,CN=ca1.confluentdemo.io, rules [RULE:^CN=(.*?),OU=ServiceUsers.*$/$1]
+confluent.rest.auth.ssl.principal.mapping.rules=RULE:.*CN=(.*?)/$1/
+
+
+Create CA
+
+openssl req -new -x509 -keyout ca-key -out ca-cert -days 3650 -passin pass:password -passout pass:password -subj '/CN=ca1.confluentdemo.io/OU=CSTA/O=Confluent/L=PaloAlto/ST=CA/C=US'
+
+
+Import CA into Both Stores
+
+keytool -keystore kafka.client.truststore.jks -alias CARoot -import -file ca-cert -storepass password -keypass password
+
+keytool -keystore kafka.server.truststore.jks -alias CARoot -importcert -file ca-cert -storepass password -keypass password
+
+
+Sign the Server Certificate with the CA
+
+keytool -keystore kafka.server.keystore.jks -alias restproxy -certreq -file cert-file -storepass password -keypass password -ext "SAN=dns:restproxy,dns:localhost"
+
+
+openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed -days 3650 -CAcreateserial
+
+keytool -keystore kafka.server.keystore.jks -alias CARoot -import -file ca-cert
+
+keytool -keystore kafka.server.keystore.jks -alias restproxy -import -file cert-signed -storepass password -keypass password -ext "SAN=dns:restproxy,dns:localhost"
