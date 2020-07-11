@@ -1,0 +1,3 @@
+bin/kafka-console-consumer --bootstrap-server pkc-l568e.us-west-1.aws.confluent.cloud:9092 --consumer.config producer.ccloud.gcp.properties --topic kafka-lag-topic --group mac
+
+bin/kafka-producer-perf-test --producer.config producer.ccloud.gcp.properties  --topic kafka-lag-topic --num-records 1000000 --throughput 100000 --record-size 500
