@@ -1,5 +1,5 @@
 This is against CCloud
 
-bin/kafka-avro-console-producer --producer.config producer.ccloud.gcp.properties --broker-list pkc-l568e.us-west-1.aws.confluent.cloud:9092 --topic demo_avro --property value.schema='{"type":"record","name":"flights3","fields":[{"name":"flight_id","type":"string"},{"name":"flight_to", "type": "string"}, {"name":"flight_from", "type": "string"}]}' --property schema.registry.url="https://psrc-4nrnd.us-central1.gcp.confluent.cloud" --property schema.registry.basic.auth.user.info="X5IF76XMGAGDBTFH":"kTBobcX+OvlGlPzQO9TR/p7O4R3yImBofAMEcs7TDS7rpuDcIgdt++SzyvGjWHBW" --property basic.auth.credentials.source=USER_INFO
+bin/kafka-avro-console-producer --producer.config producer.ccloud.gcp.properties --broker-list pkc-l568e.us-west-1.aws.confluent.cloud:9092 --topic demo_avro --property value.schema='{"type":"record","name":"flights3","fields":[{"name":"flight_id","type":"string"},{"name":"flight_to", "type": "string"}, {"name":"flight_from", "type": "string"}]}' --property schema.registry.url="https://psrc-4nrnd.us-central1.gcp.confluent.cloud" --property schema.registry.basic.auth.user.info="API KEY":"API Secret" --property basic.auth.credentials.source=USER_INFO
 
 {"flight_id":"101","flight_to":"LHR","flight_from":"SFO"}
