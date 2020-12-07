@@ -7,3 +7,9 @@ Topic Receive Sample
 
 javac -classpath ../wls1411/wlserver/server/lib/wlthint3client.jar TopicReceive.java
 java -classpath ../wls1411/wlserver/server/lib/wlthint3client.jar:. TopicReceive t3://localhost:7001
+
+
+Useful Web Pages
+
+http://middlewaremagic.com/weblogic/?p=1987
+http://middlewaremagic.com/weblogic/?p=2431
