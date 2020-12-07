@@ -1,0 +1,20 @@
+{
+  "name": "jms-source-ds",
+  "config": {
+    "connector.class": "io.confluent.connect.weblogic.WeblogicSourceConnector",
+    "kafka.topic": "JMS-Output",
+    "jms.destination.name": "MAC-JMSServer/MAC-SystemModule!MAC-JMSServer@MAC-DistributedTopic",
+    "jms.destination.type": "topic",
+    "jms.subscription.durable": true,
+    "jms.subscription.shared": true,
+    "java.naming.factory.initial": "weblogic.jndi.WLInitialContextFactory",
+    "connection.factory.name": "MACCF",
+    "java.naming.provider.url": "t3://localhost:7001",
+    "jms.client.id": "kc-client-id",
+    "weblogic.jms.client.id": "wcid-DurShareSub",
+    "tasks.max": "4",
+    "jms.message.selector": "",
+    "jms.subscription.name": "kc-DurShareSub",
+    "confluent.topic.bootstrap.servers": "127.0.0.1:9092"
+  }
+}
