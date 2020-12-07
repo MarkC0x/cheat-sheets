@@ -1,0 +1,9 @@
+Topic Send Sample
+
+javac -classpath ../wls1411/wlserver/server/lib/wlthint3client.jar TopicSend.java
+java -classpath ../wls1411/wlserver/server/lib/wlthint3client.jar:. TopicSend t3://localhost:7001
+
+Topic Receive Sample
+
+javac -classpath ../wls1411/wlserver/server/lib/wlthint3client.jar TopicReceive.java
+java -classpath ../wls1411/wlserver/server/lib/wlthint3client.jar:. TopicReceive t3://localhost:7001
