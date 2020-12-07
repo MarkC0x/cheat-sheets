@@ -1,3 +1,5 @@
+# curl -X POST -H "Content-Type: application/json" --data @jms-connector.json http://localhost:8083/connectors
+
 {
   "name": "jms-source-ds",
   "config": {
