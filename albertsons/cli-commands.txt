@@ -1,0 +1,21 @@
+Export
+
+export CLASSPATH=/home/ubuntu/confluent-5.5.0/share/java/kafka-connect-replicator/*
+
+Replicator CURL Commands
+
+curl -X POST -H "Content-Type: application/json" --data @replicator.json http://localhost:8083/connectors
+curl -X DELETE http://localhost:8083/connectors/replicator-east-to-west
+
+curl -s "http://localhost:8083/connectors/replicator-east-to-west/status" | jq
+curl -s "http://localhost:8083/connectors/replicator-west-to-east/status" | jq
+
+West
+
+bin/kafka-console-producer --bootstrap-server ec2-13-56-209-109.us-west-1.compute.amazonaws.com:9092 --topic albertsons
+bin/kafka-console-consumer --group albertsons-group --consumer-property interceptor.classes=io.confluent.connect.replicator.offsets.ConsumerTimestampsInterceptor --bootstrap-server ec2-13-56-209-109.us-west-1.compute.amazonaws.com:9092 --topic albertsons
+
+East
+
+bin/kafka-console-producer --bootstrap-server ec2-54-177-42-134.us-west-1.compute.amazonaws.com:9092 --topic albertsons
+bin/kafka-console-consumer --group albertsons-group --consumer-property interceptor.classes=io.confluent.connect.replicator.offsets.ConsumerTimestampsInterceptor --bootstrap-server ec2-54-177-42-134.us-west-1.compute.amazonaws.com:9092 --topic albertsons
