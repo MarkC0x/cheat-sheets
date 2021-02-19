@@ -1,0 +1,23 @@
+Use 6.1 version of kafka-reassign-partitions
+============================================
+
+{"partitions":
+  [{"topic": "multi-region-async",
+    "partition": 0,
+    "replicas": [1,2,3,4],
+    "observers":[3,4],
+    "log_dirs": ["any","any","any","any"] }],
+  "version":1
+}
+
+docker ps
+docker cp reassignment-json c447a213f45c:reassignment-json
+docker-compose exec broker-east-3 bash
+
+
+kafka-reassign-partitions --bootstrap-server broker-east-3:19093 --execute --reassignment-json-file /reassignment-json
+
+kafka-topics --describe --bootstrap-server broker-east-3:19093 --topic multi-region-async
+
+Note: Observers move quickly upon command execution, but ISR leaders need to wait for the preferred leader election timeout (or force with command)
+
