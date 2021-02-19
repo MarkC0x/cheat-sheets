@@ -1,4 +1,4 @@
-Use 6.1 version of kafka-reassign-partitions
+Use 6.1 version of kafka-reassign-partitions (Use with https://github.com/confluentinc/examples/tree/6.1.0-post/multiregion)
 ============================================
 
 [reassignment-json]
