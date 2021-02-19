@@ -11,7 +11,7 @@ Use 6.1 version of kafka-reassign-partitions
 }
 
 docker ps
-docker cp reassignment-json c447a213f45c:reassignment-json
+docker cp reassignment-json <container_id>:reassignment-json
 docker-compose exec broker-east-3 bash
 
 
