@@ -19,5 +19,7 @@ kafka-reassign-partitions --bootstrap-server broker-east-3:19093 --execute --rea
 
 kafka-topics --describe --bootstrap-server broker-east-3:19093 --topic multi-region-async
 
-Note: Observers move quickly upon command execution, but ISR leaders need to wait for the preferred leader election timeout (or force with command)
+Note: Observers move quickly upon command execution, but ISR leaders may need to force the preferred leader election with the following command
+
+kafka-leader-election --bootstrap-server broker-east-3:19093 --election-type PREFERRED --all-topic-partitions
 
