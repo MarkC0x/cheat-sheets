@@ -1,6 +1,7 @@
 Use 6.1 version of kafka-reassign-partitions
 ============================================
 
+[reassignment-json]
 {"partitions":
   [{"topic": "multi-region-async",
     "partition": 0,
