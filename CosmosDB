@@ -1,0 +1,17 @@
+curl --location --request PUT 'http://localhost:8083/connectors/cosmosdb-source-connector/config' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "connector.class": "com.azure.cosmos.kafka.connect.source.CosmosDBSourceConnector",
+    "tasks.max": "1",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "connect.cosmosdb.task.poll.interval": "1000",
+    "connect.cosmosdb.connection.endpoint": "https://mcox.documents.azure.com:443/",
+    "connect.cosmosdb.master.key": "<-------- Secret -------->",
+    "connect.cosmosdb.databasename": "ToDoList",
+    "connect.cosmosdb.containers.topicmap": "CosmosTopic#Items",
+    "connect.cosmosdb.containers": "Items",
+    "connect.cosmosdb.offset.useLatest": false,
+    "value.converter.schemas.enable": "false",
+    "key.converter.schemas.enable": "false"
+}'
