@@ -1,0 +1,11 @@
+Quickstart
+
+https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal
+
+{
+    "id": "1",
+    "category": "personal",
+    "name": "groceries",
+    "description": "Pick up apples and strawberries.",
+    "isComplete": false
+}
