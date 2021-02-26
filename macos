@@ -1,0 +1,5 @@
+sudo softwareupdate --ignore "macOS Big Sur"
+
+to disable the reminder just for this update.
+
+sudo softwareupdate --reset-ignored
