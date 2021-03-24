@@ -1,0 +1,121 @@
+Create a Kubernetes Cluster and Get Things Ready to Deploy a Cluster
+====================================================================
+
+➜  eksctl create cluster --name=mcox-operator-ea --nodes 5 --region us-west-2
+
+Error:
+2021-03-24 09:39:53 [✖]  AWS::EC2::EIP/NATIP: CREATE_FAILED – "The maximum number of addresses has been reached. (Service: AmazonEC2; Status Code: 400; Error Code: AddressLimitExceeded; Request ID: 0912679b-0c28-4055-9e3e-449ffb7a8607; Proxy: null)"
+
+Note: To resolve the above error I had to request a Service Quota increase (5 -> 20): EC2-VPC Elastic IPs
+
+With any luck you should then receive (after some time) the following messages:
+
+2021-03-24 10:12:04 [ℹ]  kubectl command should work with "/Users/mark.cox/.kube/config", try 'kubectl get nodes'
+2021-03-24 10:12:04 [✔]  EKS cluster "mcox-operator-ea" in "us-west-2" region is ready
+
+
+➜  operator-earlyaccess git:(master) kubectl get nodes
+NAME                                           STATUS   ROLES    AGE   VERSION
+ip-192-168-3-46.us-west-2.compute.internal     Ready    <none>   93s   v1.18.9-eks-d1db3c
+ip-192-168-31-48.us-west-2.compute.internal    Ready    <none>   97s   v1.18.9-eks-d1db3c
+ip-192-168-37-105.us-west-2.compute.internal   Ready    <none>   93s   v1.18.9-eks-d1db3c
+ip-192-168-41-149.us-west-2.compute.internal   Ready    <none>   99s   v1.18.9-eks-d1db3c
+ip-192-168-72-137.us-west-2.compute.internal   Ready    <none>   96s   v1.18.9-eks-d1db3c
+
+
+➜  operator-earlyaccess git:(master) kubectl create namespace confluent
+namespace/confluent created
+
+
+➜  operator-earlyaccess git:(master) kubectl config set-context --current --namespace=confluent
+Context "mcox@mcox-operator-ea.us-west-2.eksctl.io" modified.
+
+
+➜  operator-earlyaccess git:(master) export USER=mark.cox@confluent.io
+➜  operator-earlyaccess git:(master) export EMAIL=mark.cox@confluent.io
+➜  operator-earlyaccess git:(master) export APIKEY=<API Key>
+
+
+➜  operator-earlyaccess git:(master) kubectl create secret docker-registry confluent-registry \
+  --docker-server=confluent-docker-internal-early-access-operator-2.jfrog.io \
+  --docker-username=$USER \
+        --docker-password=$APIKEY \
+        --docker-email=$EMAIL
+secret/confluent-registry created
+
+
+➜  operator-earlyaccess git:(master) helm repo add confluentinc_earlyaccess \
+  https://confluent.jfrog.io/confluent/helm-early-access-operator-2 \
+  --username $USER \
+  --password $APIKEY
+"confluentinc_earlyaccess" has been added to your repositories
+
+
+➜  operator-earlyaccess git:(master) helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "confluentinc_earlyaccess" chart repository
+Update Complete. ⎈ Happy Helming!⎈ 
+
+
+Deploy Confluet Operator
+========================
+
+➜  operator-earlyaccess git:(master) export TUTORIAL_HOME=/Users/mark.cox/Software/operator-earlyaccess/quickstart-deploy 
+
+
+➜  operator-earlyaccess git:(master) helm upgrade --install operator confluentinc_earlyaccess/confluent-operator --set image.registry=confluent-docker-internal-early-access-operator-2.jfrog.io
+Release "operator" does not exist. Installing it now.
+NAME: operator
+LAST DEPLOYED: Wed Mar 24 10:29:18 2021
+NAMESPACE: confluent
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+The Confluent Operator
+
+The Confluent Operator brings the component (Confluent Services) specific controllers for kubernetes by providing components specific Custom Resource
+Definition (CRD) as well as managing other Confluent Platform services
+
+
+➜  operator-earlyaccess git:(master) kubectl get pods                                                                    
+NAME                                  READY   STATUS    RESTARTS   AGE
+confluent-operator-5467c847cc-xnmvs   1/1     Running   0          48s
+
+
+➜  operator-earlyaccess git:(master) kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
+zookeeper.platform.confluent.io/zookeeper created
+kafka.platform.confluent.io/kafka created
+connect.platform.confluent.io/connect created
+ksqldb.platform.confluent.io/ksqldb created
+controlcenter.platform.confluent.io/controlcenter created
+schemaregistry.platform.confluent.io/schemaregistry created
+➜
+
+
+➜  operator-earlyaccess git:(master) kubectl get confluent         
+NAME                                                REPLICAS   READY   STATUS    AGE
+controlcenter.platform.confluent.io/controlcenter   1          1       RUNNING   6m30s
+
+NAME                                                  REPLICAS   READY   STATUS    AGE
+schemaregistry.platform.confluent.io/schemaregistry   1          1       RUNNING   6m30s
+
+NAME                                        REPLICAS   READY   STATUS    AGE
+zookeeper.platform.confluent.io/zookeeper   3          3       RUNNING   6m31s
+
+NAME                                    REPLICAS   READY   STATUS    AGE
+connect.platform.confluent.io/connect   1          1       RUNNING   6m30s
+
+NAME                                REPLICAS   READY   STATUS    AGE
+kafka.platform.confluent.io/kafka   3          3       RUNNING   6m30s
+
+NAME                                  REPLICAS   READY   STATUS    AGE
+ksqldb.platform.confluent.io/ksqldb   1          1       RUNNING   6m31s
+
+
+➜  operator-earlyaccess git:(master) kubectl port-forward controlcenter-0 9021:9021
+Forwarding from 127.0.0.1:9021 -> 9021
+Forwarding from [::1]:9021 -> 9021
+
+
+http://localhost:9021
