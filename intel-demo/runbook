@@ -164,6 +164,8 @@ docker-compose exec kafka2 kafka-console-consumer \
 
 10. Describe the topic configurations:
 
+RE_RUN THIS TOMORROW AS MY BRAIN IS TOAST, AND I CAN'T BE CERTAIN THIS IS THE CORRECT OUTPUT (PLUS, LAPTOP DIED)
+
 ./describe-topics.sh           
 
 Topic: multi-region-async-0	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints=
