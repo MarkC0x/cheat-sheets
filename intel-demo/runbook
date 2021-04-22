@@ -1,6 +1,10 @@
 Steps Taken to Run Intel Proposed "Flip the World" (Addison's Proposed Solution)
 ================================================================================
 
+West Rack	East Rack
+kafka0		kafka2
+kafka1		kafka3
+
 1. Start up everything:
 
 docker-compose up -d
