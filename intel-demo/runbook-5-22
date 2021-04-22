@@ -1,0 +1,161 @@
+Steps Taken to Run Intel Proposed "Flip the World" (Addison's Proposed Solution)
+================================================================================
+
+West Rack	East Rack
+kafka0		kafka2
+kafka1		kafka3
+
+1. Start up everything:
+
+docker-compose up -d
+
+docker-compose ps
+
+     Name                 Command            State                            Ports                          
+-------------------------------------------------------------------------------------------------------------
+control-center   /etc/confluent/docker/run   Up      0.0.0.0:9021->9021/tcp                                  
+kafka0           /etc/confluent/docker/run   Up      0.0.0.0:8090->8090/tcp, 0.0.0.0:9092->9092/tcp          
+kafka1           /etc/confluent/docker/run   Up      0.0.0.0:8190->8190/tcp, 9092/tcp, 0.0.0.0:9192->9192/tcp
+kafka2           /etc/confluent/docker/run   Up      0.0.0.0:8290->8290/tcp, 9092/tcp, 0.0.0.0:9292->9292/tcp
+kafka3           /etc/confluent/docker/run   Up      0.0.0.0:8390->8390/tcp, 9092/tcp, 0.0.0.0:9392->9392/tcp
+zookeeper        /etc/confluent/docker/run   Up      0.0.0.0:2181->2181/tcp, 2888/tcp, 3888/tcp              
+
+
+2. Create some multi-region async topics:
+
+docker-compose exec kafka0 kafka-topics --create \ 
+        --bootstrap-server kafka0:9092 \
+        --topic multi-region-async-[0-3] \
+        --partitions 1 \
+        --replica-placement /etc/kafka/demo/placement-multi-region-async.json \
+        --config min.insync.replicas=1
+
+Created topic multi-region-async-0.
+
+
+3. Describe the topic configurations:
+
+./describe-topics.sh                              
+
+Topic: multi-region-async-0	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints=
+{"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-0	Partition: 0	Leader: 1	Replicas: 1,0,2,3	Isr: 1,0	Offline: 	Observers: 2,3
+
+Topic: multi-region-async-1	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints=
+{"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-1	Partition: 0	Leader: 0	Replicas: 0,1,3,2	Isr: 0,1	Offline: 	Observers: 3,2
+
+Topic: multi-region-async-2	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints=
+{"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-2	Partition: 0	Leader: 1	Replicas: 1,0,2,3	Isr: 1,0	Offline: 	Observers: 2,3
+
+Topic: multi-region-async-3	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints=
+{"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-3	Partition: 0	Leader: 0	Replicas: 0,1,2,3	Isr: 0,1	Offline: 	Observers: 2,3
+
+
+4. Shut-down the two brokers running "west" rack (i.e. kafka0 and kafka1)
+
+docker-compose stop kafka0 kafka1
+
+docker-compose ps
+
+     Name                 Command             State                              Ports                          
+----------------------------------------------------------------------------------------------------------------
+control-center   /etc/confluent/docker/run   Up         0.0.0.0:9021->9021/tcp                                  
+kafka0           /etc/confluent/docker/run   Exit 137                                                           
+kafka1           /etc/confluent/docker/run   Exit 143                                                           
+kafka2           /etc/confluent/docker/run   Up         0.0.0.0:8290->8290/tcp, 9092/tcp, 0.0.0.0:9292->9292/tcp
+kafka3           /etc/confluent/docker/run   Up         0.0.0.0:8390->8390/tcp, 9092/tcp, 0.0.0.0:9392->9392/tcp
+zookeeper        /etc/confluent/docker/run   Up         0.0.0.0:2181->2181/tcp, 2888/tcp, 3888/tcp              
+
+
+5. Describe the topic configurations:
+
+./describe-topics.sh 
+
+Topic: multi-region-async-0	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-0	Partition: 0	Leader: none	Replicas: 1,0,2,3	Isr: 0	Offline: 1,0	Observers: 2,3
+
+Topic: multi-region-async-1	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-1	Partition: 0	Leader: none	Replicas: 0,1,3,2	Isr: 0	Offline: 0,1	Observers: 3,2
+
+Topic: multi-region-async-2	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-2	Partition: 0	Leader: none	Replicas: 1,0,2,3	Isr: 0	Offline: 1,0	Observers: 2,3
+
+Topic: multi-region-async-3	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-3	Partition: 0	Leader: none	Replicas: 0,1,2,3	Isr: 0	Offline: 0,1	Observers: 2,3
+
+
+6. Fail-over the topics to the "east" rack brokers (i.e. kafka1 and kafka2)
+
+docker-compose exec kafka2 kafka-leader-election --bootstrap-server kafka2:9292 --election-type UNCLEAN --all-topic-partitions 
+
+Successfully completed leader election (UNCLEAN) for partitions multi-region-async-3-0, multi-region-async-2-0, multi-region-async-1-0, multi-region-async-0-0
+
+
+5. Describe the topic configurations:
+
+./describe-topics.sh                                                                                                          
+
+Topic: multi-region-async-0	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-0	Partition: 0	Leader: 2	Replicas: 1,0,2,3	Isr: 2,3	Offline: 1,0	Observers: 2,3
+
+Topic: multi-region-async-1	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-1	Partition: 0	Leader: 3	Replicas: 0,1,3,2	Isr: 3,2	Offline: 0,1	Observers: 3,2
+
+Topic: multi-region-async-2	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-2	Partition: 0	Leader: 2	Replicas: 1,0,2,3	Isr: 2,3	Offline: 1,0	Observers: 2,3
+
+Topic: multi-region-async-3	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"west"}}],"observers":[{"count":2,"constraints":{"rack":"east"}}]}
+	Topic: multi-region-async-3	Partition: 0	Leader: 2	Replicas: 0,1,2,3	Isr: 2,3	Offline: 0,1	Observers: 2,3
+
+
+6. Flip the World (Note: there is no way to do this for all topics in a single command):
+
+docker-compose exec kafka2 kafka-configs \
+	--topic multi-region-async-[0-3] \
+	--bootstrap-server kafka2:9292 --alter \
+	--replica-placement /etc/kafka/demo/flip-the-world-isr-only.json
+
+Completed updating config for topic multi-region-async-[0-3].
+
+
+7. Describe the topic configurations:
+
+./describe-topics.sh                      
+
+Topic: multi-region-async-0	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"east"}}],"observers":[]}
+	Topic: multi-region-async-0	Partition: 0	Leader: 2	Replicas: 1,0,2,3	Isr: 2,3	Offline: 1,0	Observers: 2,3
+
+Topic: multi-region-async-1	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"east"}}],"observers":[]}
+	Topic: multi-region-async-1	Partition: 0	Leader: 3	Replicas: 0,1,3,2	Isr: 3,2	Offline: 0,1	Observers: 3,2
+
+Topic: multi-region-async-2	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"east"}}],"observers":[]}
+	Topic: multi-region-async-2	Partition: 0	Leader: 2	Replicas: 1,0,2,3	Isr: 2,3	Offline: 1,0	Observers: 2,3
+
+Topic: multi-region-async-3	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"east"}}],"observers":[]}
+	Topic: multi-region-async-3	Partition: 0	Leader: 2	Replicas: 0,1,2,3	Isr: 2,3	Offline: 0,1	Observers: 2,3
+
+
+8. Bounced kafka3 to simulate a broker going offline (or network interruption) temporarily
+
+docker-compose stop kafka3
+docker-compose start kafka3
+
+
+9. Describe the topic configurations:
+
+./describe-topics.sh           
+
+Topic: multi-region-async-0	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"east"}}],"observers":[]}
+	Topic: multi-region-async-0	Partition: 0	Leader: 2	Replicas: 1,0,2,3	Isr: 2,3	Offline: 1,0	Observers: 2,3
+
+Topic: multi-region-async-1	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"east"}}],"observers":[]}
+	Topic: multi-region-async-1	Partition: 0	Leader: 2	Replicas: 0,1,3,2	Isr: 2,3	Offline: 0,1	Observers: 3,2
+
+Topic: multi-region-async-2	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"east"}}],"observers":[]}
+	Topic: multi-region-async-2	Partition: 0	Leader: 2	Replicas: 1,0,2,3	Isr: 2,3	Offline: 1,0	Observers: 2,3
+
+Topic: multi-region-async-3	PartitionCount: 1	ReplicationFactor: 4	Configs: min.insync.replicas=1,confluent.placement.constraints={"version":1,"replicas":[{"count":2,"constraints":{"rack":"east"}}],"observers":[]}
+	Topic: multi-region-async-3	Partition: 0	Leader: 2	Replicas: 0,1,2,3	Isr: 2,3	Offline: 0,1	Observers: 2,3
