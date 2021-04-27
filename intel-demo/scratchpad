@@ -6,3 +6,5 @@ docker-compose exec kafka2 confluent-rebalancer status --bootstrap-server kafka2
     
 docker-compose exec kafka2 confluent-rebalancer finish --bootstrap-server kafka2:9292
         
+
+docker-compose exec zookeeper zookeeper-shell zookeeper:2181 get /controller
