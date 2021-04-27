@@ -1,5 +1,5 @@
-Steps Taken to Run Intel Proposed "Flip the World" (Addison's Proposed Solution)
-================================================================================
+Steps Taken to Run Proposed "Flip the World" (Addison's Proposed Solution)
+==========================================================================
 
 West Rack	East Rack
 kafka0		kafka2
@@ -23,7 +23,7 @@ zookeeper        /etc/confluent/docker/run   Up      0.0.0.0:2181->2181/tcp, 288
 
 2. Create some multi-region async topics:
 
-docker-compose exec kafka0 kafka-topics --create \ 
+docker-compose exec kafka0 kafka-topics --create \
         --bootstrap-server kafka0:9092 \
         --topic multi-region-async-[0-3] \
         --partitions 1 \
