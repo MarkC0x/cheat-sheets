@@ -1,0 +1,8 @@
+docker-compose exec kafka2 confluent-rebalancer execute --bootstrap-server kafka2:9292 --replica-placement-only --verbose 
+    --throttle 10000000 --topics multi-region-async-[0-3]
+
+ 
+docker-compose exec kafka2 confluent-rebalancer status --bootstrap-server kafka2:9292
+    
+docker-compose exec kafka2 confluent-rebalancer finish --bootstrap-server kafka2:9292
+        
