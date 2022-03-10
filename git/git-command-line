@@ -17,3 +17,5 @@ mvn install -DskipTests
 git commit -am "#363 - New MySQL Sink Dialect Update to TEXT"
 
 git push --set-upstream origin 363-updated
+
+https://stackoverflow.com/questions/25545613/how-can-i-push-to-my-fork-from-a-clone-of-the-original-repo
